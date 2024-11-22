@@ -1,0 +1,32 @@
+# Archivos de bytecode compilados
+__pycache__/
+*.py[cod]
+
+# Entornos virtuales
+venv/
+env/
+*.env
+.env/
+
+# Archivos de configuración de IDEs (por ejemplo, PyCharm, VSCode, etc.)
+.idea/
+.vscode/
+
+# Archivos de configuración de macOS
+.DS_Store
+
+# Archivos de configuración de sistemas de paquetes
+pip-wheel-metadata/
+*.egg-info/
+
+# Logs y otros archivos temporales
+*.log
+*.pot
+*.pyc
+
+# Archivos de bases de datos locales
+*.sqlite3
+*.db
+
+# Archivos de respaldo de editores
+*~
