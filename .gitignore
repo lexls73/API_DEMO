@@ -30,3 +30,8 @@ pip-wheel-metadata/
 
 # Archivos de respaldo de editores
 *~
+
+# Archivos de trabajo
+*.csv
+*.xlsx
+*.json
