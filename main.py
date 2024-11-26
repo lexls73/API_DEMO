@@ -8,7 +8,7 @@ if __name__ == "__main__":
     parser.add_argument("--api", required=True, help="API to connect")
     parser.add_argument("--customer", required=True, help="Customer")
     parser.add_argument("--action", required=True, help=["get","create","update","delete","query"])
-    parser.add_argument("--endpoint", required=True, help="Endpoint")
+    parser.add_argument("--endpoint", required=False, help="Endpoint")
     parser.add_argument("--entity_type", required=False, help="Type of Entity")
     parser.add_argument("--entity_id", required=False, help="ID of Entity")
     parser.add_argument("--data_files", required=False, help="")
@@ -22,8 +22,11 @@ if __name__ == "__main__":
     try:
         if args.action == "get":
 
-            with open("./PAYLOADS/params.json") as f:
-                params = json.load(f)
+            if args.api == 'execute':
+                params = None
+            else:
+                with open("./PAYLOADS/params.json") as f:
+                    params = json.load(f)
 
             files = True
 

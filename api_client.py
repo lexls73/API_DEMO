@@ -103,15 +103,15 @@ class APIClient:
 
     def create_json(self, datos_json):
 
-        """ print("====================================")
-        print("Borrando archivos antiguos")
-        for filename in os.listdir(self.M_FOLDER_PATH):
-            file_path = os.path.join(self.M_FOLDER_PATH, filename)
-            if os.path.isfile(file_path):  # Comprobar si es un archivo
-                os.remove(file_path)  # Eliminar el archivo
+        # print("====================================")
+        # print("Borrando archivos antiguos")
+        # for filename in os.listdir(self.M_FOLDER_PATH):
+        #     file_path = os.path.join(self.M_FOLDER_PATH, filename)
+        #     if os.path.isfile(file_path):  # Comprobar si es un archivo
+        #         os.remove(file_path)  # Eliminar el archivo
 
-        print("====================================")
-        print("Archivos borrados") """
+        # print("====================================")
+        # print("Archivos borrados")
 
         # Guardar el JSON en un archivo
         file = f"{self.M_FOLDER_PATH}{self.m_archivo}.json"
@@ -191,10 +191,10 @@ class APIClient:
                     print("============ERROR=============")
                     print(f"Error en la solicitud: {e}")
                     return False
-                except Exception as e:
-                    print("============ERROR=============")
-                    print(f"Error en la solicitud: {e}")
-                    return False
+                # except Exception as e:
+                #     print("============ERROR=============")
+                #     print(f"Error en la solicitud: {e}")
+                #     return False
             else:
                 print("====================================")
                 print(f"Metodo desconocido o no configurado. Metodos actualmente configurados {self.M_ALLOW_METHODS}")
@@ -305,9 +305,9 @@ class APIClient:
             )
 
 
-client = APIClient(api="execute", customer="freseniuskabi-3")
+#client = APIClient(api="execute", customer="freseniuskabi-3")
 
-client.get(entity_type="process-orders",entity_id='Wilson_NewPackaging_12345',endpoint='records',date_files=False)
+#client.get(entity_type="process-orders",entity_id='Wilson_NewPackaging_12345',date_files=False)
 
 #with open("./PAYLOADS/master_recipie.json") as f:
 #    payload = json.dumps(json.load(f))
