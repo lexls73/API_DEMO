@@ -36,3 +36,6 @@ pip-wheel-metadata/
 *.csv
 *.xlsx
 *.json
+
+# Otros
+pruebas.ipynb
