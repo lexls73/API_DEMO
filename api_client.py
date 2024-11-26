@@ -15,10 +15,8 @@ class APIClient:
     m_job_id: str
     m_mr_id: str
     M_FOLDER_PATH = "./DATA/"
-    M_UNIFY_CREDENTIALS_PATH = (
-        "/Users/alejandro.lopez.ext/.config/PlatformAPIClient/apiClientCredentials.cfg"
-    )
-
+    M_UNIFY_CREDENTIALS_PATH = ("/Users/alejandro.lopez.ext/.config/PlatformAPIClient/apiClientCredentials.cfg")
+    M_EXECUTE_CREDENTIALS_PATH = ("/Users/alejandro.lopez.ext/.config/PlatformAPIClient/apiExecuteTokens.cfg")
     M_ALLOW_METHODS = ["GET", "POST", "DEL"]
 
     def __init__(self, api="unify", customer="default"):
@@ -36,16 +34,23 @@ class APIClient:
         self.get_token()
 
     def get_token(self):
+        
+        headersList = {"Content-Type": "application/json"}
+        payload = json.dumps(self.get_credentials())
+        
         if self.m_api == "unify":
 
-            payload = json.dumps(self.get_credentials())
-
             print("====================================")
-            print(f"Obteniendo el TOKEN para UNIFY - Customer {self.m_customer}")
+            print(f"Obteniendo el ACCES TOKEN para UNIFY - Customer {self.m_customer}")
 
             reqUrl = f"https://api.{self.m_customer}.bigfinite.ai/v2/token"
 
-            headersList = {"Content-Type": "application/json"}
+        else:
+
+            print("====================================")
+            print(f"Obteniendo el ACCES TOKEN para EXECUTE - Customer {self.m_customer}")
+            
+            reqUrl = f"https://api.{self.m_customer}.aizonexecute.ai/v1/login/refresh"
 
         response = requests.request("POST", reqUrl, data=payload, headers=headersList)
 
@@ -76,22 +81,29 @@ class APIClient:
                 "password": config[self.m_customer]["password"],
                 "customer": config[self.m_customer]["customer"],
             }
-
-            self.m_customer = config[self.m_customer]["customer"]
-
+            
             print("====================================")
-            print(
-                f"Credenciales para usuario {config[self.m_customer]['user']} Obtenidas"
-            )
+            print(f"Credenciales para usuario {config[self.m_customer]['user']} Obtenidas")
         else:
             print("====================================")
             print(f"Obteniendo Credenciales para entorno {self.m_customer}")
+            
+            config.read(self.M_EXECUTE_CREDENTIALS_PATH)
+            
+            credentials = {
+                "refreshToken": config[self.m_customer]["refreshToken"]
+            }
+            
+            print("====================================")
+            print(f"Credenciales para usuario {self.m_customer} Obtenidas")
+            
+        self.m_customer = config[self.m_customer]["customer"]
 
         return credentials
 
     def create_json(self, datos_json):
 
-        print("====================================")
+        """ print("====================================")
         print("Borrando archivos antiguos")
         for filename in os.listdir(self.M_FOLDER_PATH):
             file_path = os.path.join(self.M_FOLDER_PATH, filename)
@@ -99,7 +111,7 @@ class APIClient:
                 os.remove(file_path)  # Eliminar el archivo
 
         print("====================================")
-        print("Archivos borrados")
+        print("Archivos borrados") """
 
         # Guardar el JSON en un archivo
         file = f"{self.M_FOLDER_PATH}{self.m_archivo}.json"
@@ -125,21 +137,11 @@ class APIClient:
         print("====================================")
         print("Archivo csv Creado")
 
-    def _make_request(
-        self, method, url, params=None, data=None, json=None, val="", job_id=False
-    ) -> bool:
-        """
-        Método interno para realizar solicitudes HTTP.
-
-        :param method: Método HTTP (GET, POST, PUT, DELETE, etc.).
-        :param endpoint: Endpoint de la API (relativo a la base_url).
-        :param params: Parámetros de consulta para la solicitud (opcional).
-        :param data: Datos en formato x-www-form-urlencoded o multipart (opcional).
-        :param json: Datos en formato JSON (opcional).
-        :return bool: Respuesta de la API true o false.
-        """
+    def _make_request(self, method, url, params=None, data=None, json=None, val="", job_id=False) -> bool:
 
         if self.m_status:
+            
+            #print(self.m_api_key)
             headersList = {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + self.m_api_key,
@@ -170,7 +172,10 @@ class APIClient:
                         self.create_json(ret)
                     else:
                         if method == "GET":
-                            self.create_json(response.json()["_embedded"]["items"])
+                            if self.m_api == 'unify':
+                                self.create_json(response.json()["_embedded"]["items"])
+                            else:
+                                self.create_json(response.json())
                             print("====================================")
                             print("GET Exitoso")
                         elif method == "POST":
@@ -183,6 +188,10 @@ class APIClient:
                             print(f"Entidad {val} borrada")
                     return True
                 except requests.exceptions.RequestException as e:
+                    print("============ERROR=============")
+                    print(f"Error en la solicitud: {e}")
+                    return False
+                except Exception as e:
                     print("============ERROR=============")
                     print(f"Error en la solicitud: {e}")
                     return False
@@ -249,13 +258,20 @@ class APIClient:
 
         return records
 
-    def get(self, entity_type, entity_id, endpoint, params=None, date_files=False):
+    def get(self, entity_type, entity_id, endpoint=None, params=None, date_files=False):
         """Realiza una solicitud GET."""
 
-        self.m_archivo = entity_id
         self.m_create_data = date_files
         if self.m_api == "unify":
+            self.m_archivo = entity_id
             url = f"https://api.{self.m_customer}.bigfinite.ai/v2/{entity_type}/{entity_id}/{endpoint}"
+        else:
+            if endpoint:
+                self.m_archivo = entity_id + '_' + endpoint
+                url = f"https://api.{self.m_customer}.aizonexecute.ai/v1/{entity_type}/{entity_id}/{endpoint}"
+            else:
+                self.m_archivo = entity_id
+                url = f"https://api.{self.m_customer}.aizonexecute.ai/v1/{entity_type}/{entity_id}"
 
         return self._make_request("GET", url, params=params)
 
@@ -289,8 +305,9 @@ class APIClient:
             )
 
 
+client = APIClient(api="execute", customer="freseniuskabi-3")
 
-#client = APIClient(api="unify", customer="canary")
+client.get(entity_type="process-orders",entity_id='Wilson_NewPackaging_12345',endpoint='records',date_files=False)
 
 #with open("./PAYLOADS/master_recipie.json") as f:
 #    payload = json.dumps(json.load(f))

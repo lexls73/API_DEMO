@@ -30,9 +30,7 @@ if __name__ == "__main__":
             if args.data_files == "FALSE":
                 files = False
 
-            result = client.get(
-                args.entity_type, args.entity_id, args.endpoint, params, files
-            )
+            result = client.get(args.entity_type, args.entity_id, args.endpoint, params, files)
 
             if result:
                 print("====================================")
