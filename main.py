@@ -81,11 +81,15 @@ if __name__ == "__main__":
 
         elif args.action == "delete":
             
-            with open(f"./PAYLOADS/{args.action }.json") as f:
+            with open(f"./PAYLOADS/{args.action}.json") as f:
                 id_arrays = json.load(f)
+                
+            data = json.dumps({
+                "reason-of-request":"delete"
+            })
 
             for val in id_arrays:
-                result = client.delete(args.endpoint, val)
+                result = client.delete(endpoint=args.endpoint,val=val,data=data)
 
                 if result:
                     print("====================================")
@@ -93,7 +97,8 @@ if __name__ == "__main__":
                 else:
                     print("====================================")
                     print(f"Error al borrar la entidad {val}")
-
+                    
+        elif args.action == "put":
             result = client.put(args.endpoint)
             if result:
                 print("====================================")

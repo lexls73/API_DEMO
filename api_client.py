@@ -173,7 +173,10 @@ class APIClient:
                     else:
                         if method == "GET":
                             if self.m_api == 'unify':
-                                self.create_json(response.json()["_embedded"]["items"])
+                                if "_embedded" in response.json():
+                                    self.create_json(response.json()["_embedded"]["items"])
+                                else:
+                                    self.create_json(response.json())
                             else:
                                 self.create_json(response.json())
                             print("====================================")
@@ -291,13 +294,25 @@ class APIClient:
 
         return self._make_request("POST", url, data=data, json=json, job_id=job_id)
 
-    def put(self, endpoint, data=None, json=None):
+    def put(self, endpoint, entity_id="", data=None, json=None):
         """Realiza una solicitud PUT."""
-        return self._make_request("PUT", endpoint, data=data, json=json)
+        
+        self.m_create_data = False
+        if self.m_api == "unify":
+            if entity_id != "":
+                url = f"https://api.{self.m_customer}.bigfinite.ai/v2/{endpoint}/{entity_id}/record-queries"
+                self.m_mr_id = entity_id
+            else:
+                url = f"https://api.{self.m_customer}.bigfinite.ai/v2/{endpoint}"
+        else:
+            pass
+        
+        return self._make_request("PUT", url, data=data, json=json)
 
     def delete(self, endpoint, val, params=None, data=None, json=None):
         """Realiza una solicitud DELETE."""
         self.m_create_data = False
+        
         if self.m_api == "unify":
             url = f"https://api.{self.m_customer}.bigfinite.ai/v2/{endpoint}/{val}"
             return self._make_request(
@@ -305,9 +320,80 @@ class APIClient:
             )
 
 
-#client = APIClient(api="execute", customer="freseniuskabi-3")
+# client = APIClient(api="unify", customer="acssandbox")
 
-#client.get(entity_type="process-orders",entity_id='Wilson_NewPackaging_12345',date_files=False)
+# with open(f"./PAYLOADS/delete.json") as f:
+#     id_arrays = json.load(f)
+
+# data = json.dumps({
+#                 "reason-of-request":"delete"
+#             })            
+
+# for val in id_arrays:
+#     client.delete(endpoint="process-instances",val=val,data=data)
+
+
+# archivo_csv = "./DATA/Master_Recipie_ID_24050_1717579566.csv"
+# df = pd.read_csv(archivo_csv)
+
+# final = []
+# base = [{"entity": {"id": "ID_23120_1697847900", "type": 32}, "records": []}]
+
+# df = df.rename(columns={
+#     "Parameter_Code": "po"
+# })
+
+# i=0
+# for index, row in df.iterrows():
+#     pares = [(col, row[col]) for col in df.columns]
+#     po=""
+#     for col, value in pares:  # Iterar sobre los pares
+#         if i == 99:
+#             i=0
+#             final.append(base)
+#             base[0]["records"] = []
+#         else:
+#             if col == "po":
+#                 po = value
+#             else:
+#                 base[0]["records"].append({
+#                     "po": po,
+#                     "c": col,
+#                     "v": value,
+#                 })
+#         i=i+1
+
+
+# client = APIClient(api="unify", customer="canary")
+
+# for i,val in enumerate(final):
+#     print("===========================")
+#     print(f"Subiendo Pagina {i}")
+#     payload = json.dumps(val)
+#     client.post(endpoint="data-upload/record-inputs",data=payload)
+
+# client = APIClient(api="unify", customer="acssandbox")
+
+# with open(f"./PAYLOADS/delete.json") as f:
+#     id_arrays = json.load(f)
+
+# data = json.dumps({
+#                 "reason-of-request":"delete"
+#             })            
+
+# for val in id_arrays:
+#     client.delete(endpoint="process-instances",val=val,data=data)
+
+
+#with open("./PAYLOADS/master_recipie.json") as f:
+#    payload = json.dumps(json.load(f))
+
+#result = client.post(
+#    endpoint="master-recipes",
+#    entity_id="24050_1717579566",
+#    data=payload,
+#    job_id=True,
+#)
 
 #with open("./PAYLOADS/master_recipie.json") as f:
 #    payload = json.dumps(json.load(f))
